@@ -380,6 +380,7 @@ public class WmsUtils
 				// This hashtable will store pairs of components in eastward-northward
 				// order, keyed by the standard name for the vector quantity
 				Map<String, ScalarLayer[]> components = new LinkedHashMap<String, ScalarLayer[]>();
+				Map<String, Boolean> realNorthEasts = new LinkedHashMap<String, Boolean>();
 				for (ScalarLayer layer : scalarLayers)
 				{
 					if (layer.getTitle().contains("eastward"))
@@ -392,6 +393,7 @@ public class WmsUtils
 							components.put(vectorKey, new ScalarLayer[2]);
 						}
 						components.get(vectorKey)[0] = layer;
+						realNorthEasts.put(vectorKey, true);
 					}
 					else if (layer.getTitle().contains("northward"))
 					{
@@ -403,6 +405,7 @@ public class WmsUtils
 							components.put(vectorKey, new ScalarLayer[2]);
 						}
 						components.get(vectorKey)[1] = layer;
+						realNorthEasts.put(vectorKey, true);
 					}
 
 					//Same stuff for GRIB conventions (U-component -> eastward, V-component -> norhward)            
@@ -415,6 +418,7 @@ public class WmsUtils
 							components.put(vectorKey, new ScalarLayer[2]);
 						}
 						components.get(vectorKey)[0] = layer;                
+						realNorthEasts.put(vectorKey, false);
 					}else if(layer.getTitle().contains("v-component of ")){
 						String vectorKey = layer.getTitle().replaceFirst("v-component of ", "");
 						// Look to see if we've already found the eastward component
@@ -424,6 +428,7 @@ public class WmsUtils
 							components.put(vectorKey, new ScalarLayer[2]);
 						}
 						components.get(vectorKey)[1] = layer;                
+						realNorthEasts.put(vectorKey, false);
 					}
 
 				}
@@ -436,7 +441,7 @@ public class WmsUtils
 					if (comps[0] != null && comps[1] != null)
 					{
 						// We've found both components.  Create a new Layer object
-						VectorLayer vec = new SimpleVectorLayer(key, comps[0], comps[1]);
+						VectorLayer vec = new SimpleVectorLayer(key, comps[0], comps[1], realNorthEasts.get(key));
 						vectorLayers.add(vec);
 					}
 				}
